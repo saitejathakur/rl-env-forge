@@ -14,7 +14,7 @@ $ python3 pipeline/validate_env.py envs/click-shared-flag-default
   [ ok ] GATE 6 timeout pin: instruction 1800s == task.toml 1800s
   [ ok ] GATE 1 no-op control: empty submission fails as required
   [ ok ] GATE 2 oracle control: golden patch passes the hidden test
-  [ ok ] GATE 3 regression clean: full suite green under oracle -- 1302 passed
+  [ ok ] GATE 3 regression clean: full suite green under oracle -- 1301 passed
   [ ok ] GATE 4 test-deletion: deleting the hidden test does not yield a pass
 
   verdict: SHIPPABLE  (6/6 gates passed)
