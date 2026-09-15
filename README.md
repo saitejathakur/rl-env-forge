@@ -175,7 +175,7 @@ there would be precisely the fabrication this pipeline exists to prevent.
 
 ---
 
-## Three things I got wrong building this
+## Four things I got wrong building this
 
 Kept in because the corrections are the useful part.
 
@@ -220,6 +220,48 @@ Environments built from **private production code that was never public** cannot
 be scraped, are in no corpus, and cannot become contaminated later. That is the
 one defect on the list that no pipeline closes and the right asset closes
 completely.
+
+---
+
+## What broke when it first ran on another machine
+
+The pipeline was written on one machine and then rebuilt from scratch on a
+second one — different OS, different Python, a real Docker daemon. Four bugs
+surfaced that the original machine could never have shown. They are listed
+here because the fourth one is the interesting one.
+
+**1. Repository path resolved against the wrong directory.** The task spec
+points at the source repo with a relative path. The builder resolved it
+against the current working directory instead of against the spec file's own
+location. Both happened to be the same on the first machine, so it worked by
+coincidence. On the second it failed immediately.
+
+**2. Missing `LICENSE.txt` in the builder stage.** `click` declares a license
+file in its `pyproject.toml`, and its build backend refuses to install without
+it. The Dockerfile copied `pyproject.toml` and `src/` but not the license, so
+the install failed. A real acquired codebase will do this constantly — the
+build needs files nobody thinks of as build inputs.
+
+**3. Build backend unavailable at runtime.** The runtime stage re-pointed the
+editable install at `/workspace` using `pip install --no-build-isolation`,
+which needs the build backend present. It was only ever in the builder stage's
+throwaway sandbox. Fixed by dropping the reinstall entirely and writing a
+`.pth` file instead: an editable install is just a recorded path, so there is
+no reason to invoke a build system to change it.
+
+**4. Missing `less`, which broke 30 tests silently.** `python:3.12-slim` does
+not ship a pager. `click` pipes output through `less` in 30 of its tests, all
+of which are in this task's pass-to-pass guard set. The image built
+successfully. The leak checks passed. The environment looked shippable — and
+every one of those 30 guard tests was failing before an agent touched
+anything.
+
+That last one is the reason this repo has controls at all. The first three
+failed loudly and cost minutes. The fourth reported success and would have
+poisoned every calibration number taken from this environment, with no
+indication anything was wrong. An environment that builds is not an
+environment that works, and the only way to tell the difference is to run the
+controls and read the numbers.
 
 ---
 
