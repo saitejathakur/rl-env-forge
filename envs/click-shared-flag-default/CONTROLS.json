@@ -1,0 +1,35 @@
+{
+  "verdict": "SHIPPABLE",
+  "gates": [
+    {
+      "gate": "GATE 5 seal",
+      "status": "PASS",
+      "detail": "no VCS metadata, no hidden test, no golden patch in context"
+    },
+    {
+      "gate": "GATE 6 timeout pin",
+      "status": "PASS",
+      "detail": "instruction 1800s == task.toml 1800s"
+    },
+    {
+      "gate": "GATE 1 no-op control",
+      "status": "PASS",
+      "detail": "empty submission fails as required"
+    },
+    {
+      "gate": "GATE 2 oracle control",
+      "status": "PASS",
+      "detail": "golden patch passes the hidden test"
+    },
+    {
+      "gate": "GATE 3 regression clean",
+      "status": "PASS",
+      "detail": "full suite green under oracle -- 1301 passed, 22 skipped, 1 xfailed in 0.95s"
+    },
+    {
+      "gate": "GATE 4 test-deletion",
+      "status": "PASS",
+      "detail": "deleting the hidden test does not yield a pass (collection error)"
+    }
+  ]
+}
