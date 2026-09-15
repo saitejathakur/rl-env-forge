@@ -1,0 +1,53 @@
+[task]
+id           = "click-shared-flag-default"
+title        = "Flag default ignored when two options share a parameter name"
+category     = "swe-bugfix"
+language     = "python"
+
+[source]
+repo         = "https://github.com/pallets/click"
+license      = "BSD-3-Clause"
+base_commit  = "6a1c0d077311f180b356965914e2de5b9e0fdb44"   # parent -- agent sees this
+fix_commit   = "1c20dc6e724cd5625faaa17b715ba928d44c08bf"   # oracle -- never shipped
+fix_date     = "2025-09-22"
+
+[runtime]
+# Single container. No sidecars, no docker-in-docker, no compose beyond a
+# cap_add shim. ENTRYPOINT/CMD are not honoured by the harness.
+allow_internet    = false
+agent_timeout_sec = 1800          # 30 min. Must match any budget stated in the
+                                  # instruction text. A mismatch between this
+                                  # number and the instruction is an automatic
+                                  # request-changes -- it is the most common
+                                  # pin defect I see in review.
+workdir           = "/workspace"
+user              = "agent"
+
+[verifier]
+# Delivered at grade time from a read-only, root-owned path. Not in the image.
+delivery    = "grade-time-mount"
+mount_path  = "/opt/verifier"
+mount_mode  = "ro"
+manifest    = "MANIFEST.sha256"
+entrypoint  = "python /opt/verifier/grade.py"
+
+[calibration]
+# Filled in by harness/rollout.py. Left explicitly empty rather than guessed.
+# An uncalibrated environment is not a shippable environment, and writing a
+# plausible number here would be exactly the fabrication this pipeline exists
+# to prevent.
+model            = ""
+k_rollouts       = 10
+pass_at_1        = ""
+target_band_low  = 0.0
+target_band_high = 0.5
+failure_buckets  = ""
+status           = "UNCALIBRATED"
+
+[controls]
+# All must hold before this task is shippable. See CONTROLS.json.
+no_op_must_fail  = true
+oracle_must_pass = true
+regression_clean = true
+test_deletion_must_fail = true
+seal_clean       = true

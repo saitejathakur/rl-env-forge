@@ -1,0 +1,52 @@
+commit 1c20dc6e724cd5625faaa17b715ba928d44c08bf
+Author: Stephen Rosen <sirosen@globus.org>
+Date:   Mon Sep 22 08:55:58 2025 -0500
+
+    Fix default handling to defer UNSET normalization
+    
+    When options are being parsed, multiple options may evaluate to have
+    defaults of `UNSET`, and some may evaluate to have explicitly set
+    defaults of `None`. The normalization of `UNSET -> None` is now
+    deferred until all options have been parsed, so that it is possible
+    to accurately evaluate and save the first non-UNSET default value.
+    
+    A new test exercises this functionality by pointing two flags at the
+    same parameter declaration, and showing that their behavior is not order
+    sensitive when only one of the flags has a default.
+    
+    resolves #3071
+
+diff --git a/tests/test_defaults.py b/tests/test_defaults.py
+index 3f293e8..31eee84 100644
+--- a/tests/test_defaults.py
++++ b/tests/test_defaults.py
+@@ -84,3 +84,29 @@ def test_flag_default_map(runner):
+ 
+     result = runner.invoke(cli, ["foo", "--help"], default_map={"foo": {"name": True}})
+     assert "default: name" in result.output
++
++
++def test_shared_param_prefers_first_default(runner):
++    """test that the first default is chosen when multiple flags share a param name"""
++
++    @click.command
++    @click.option("--red", "color", flag_value="red")
++    @click.option("--green", "color", flag_value="green", default=True)
++    def prefers_green(color):
++        click.echo(color)
++
++    @click.command
++    @click.option("--red", "color", flag_value="red", default=True)
++    @click.option("--green", "color", flag_value="green")
++    def prefers_red(color):
++        click.echo(color)
++
++    result = runner.invoke(prefers_green, [])
++    assert "green" in result.output
++    result = runner.invoke(prefers_green, ["--red"])
++    assert "red" in result.output
++
++    result = runner.invoke(prefers_red, [])
++    assert "red" in result.output
++    result = runner.invoke(prefers_red, ["--green"])
++    assert "green" in result.output

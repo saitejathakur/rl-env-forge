@@ -1,0 +1,25 @@
+{
+  "task_id": "click-shared-flag-default",
+  "built_at": "2026-09-14T19:05:05+00:00",
+  "source_repo": "https://github.com/pallets/click",
+  "fix_commit": "1c20dc6e724cd5625faaa17b715ba928d44c08bf",
+  "parent_commit": "6a1c0d077311f180b356965914e2de5b9e0fdb44",
+  "fix_subject": "Fix default handling to defer UNSET normalization",
+  "fix_date": "2025-09-22",
+  "scrub_actions": [
+    {
+      "rule": "CHANGES.rst",
+      "action": "section removed",
+      "why": "Unreleased notes reference adjacent UNSET/default normalization work and point at the defect area.",
+      "bytes_removed": 267
+    }
+  ],
+  "leak_findings": [],
+  "grader_sha256": "4cf7b7dca9c90f3719a43cfafbd155b01e8e74564ac91af4a6f392fac36254aa",
+  "authored_copied": [
+    "instruction.md",
+    "Dockerfile",
+    "task.toml",
+    "EXPLOIT_ANALYSIS.md"
+  ]
+}

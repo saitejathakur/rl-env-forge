@@ -1,0 +1,58 @@
+# Task specification -- input to pipeline/build_env.py
+#
+# One of these per environment. The spec is the only hand-written artifact;
+# everything in envs/ is generated from it, which is what makes this a
+# pipeline rather than a collection of one-offs.
+
+[task]
+id = "click-shared-flag-default"
+title = "Flag default ignored when two options share a parameter name"
+
+[source]
+url = "https://github.com/pallets/click"
+repo_path = "../sources/click"
+fix_commit = "1c20dc6e724cd5625faaa17b715ba928d44c08bf"
+license = "BSD-3-Clause"
+
+[authored]
+# envs/ is a BUILD OUTPUT directory and is wiped on every build. Anything
+# hand-written therefore lives HERE, in source control, and is copied in.
+# Learned the hard way: the second build silently destroyed the instruction,
+# Dockerfile and exploit analysis, which is exactly the failure a buyer would
+# hit when they try to rebuild an environment we sold them.
+dir = "../tasks/click-shared-flag-default"
+grader = "grade.py"
+copy = ["instruction.md", "Dockerfile", "task.toml", "EXPLOIT_ANALYSIS.md"]
+
+[patches]
+# Split the fix commit. Tests become the hidden verifier; source becomes the
+# oracle. Neither is shipped in the agent image.
+test_paths = ["tests/"]
+src_paths = ["src/"]
+
+[scrub]
+# Documented hint surfaces. Each removal is recorded in BUILD_REPORT.json so a
+# buyer can audit exactly what we altered and why.
+[[scrub.rules]]
+path = "CHANGES.rst"
+mode = "truncate_section"
+start = "Unreleased"
+end = "Version 8\\.3\\.0"
+why = "Unreleased notes reference adjacent UNSET/default normalization work and point at the defect area."
+
+[leak_scan]
+# Build fails if any of these survive in the agent context.
+#
+# Needles are written as ISSUE-REFERENCE FORMS, not bare digits. A bare "3071"
+# matched a wheel hash inside uv.lock on the first build -- a false positive.
+# That is the precision/recall tradeoff that governs any scrubber: too loose
+# and every build shows findings until humans stop reading them; too aggressive
+# and you silently destroy the asset you are trying to sell. Both failure modes
+# are expensive, so the needles are anchored.
+needles = [
+  "#3071\\b",                      # issue reference, GitHub form
+  ":issue:`3071`",                 # issue reference, Sphinx form
+  "issues?/3071\\b",               # issue reference, URL form
+  "defer UNSET normalization",     # the fix commit subject
+  "prefers_first_default",         # the hidden test name
+]
