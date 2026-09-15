@@ -1,6 +1,6 @@
 {
   "task_id": "click-shared-flag-default",
-  "built_at": "2026-09-14T19:05:05+00:00",
+  "built_at": "2026-09-15T15:37:09+00:00",
   "source_repo": "https://github.com/pallets/click",
   "fix_commit": "1c20dc6e724cd5625faaa17b715ba928d44c08bf",
   "parent_commit": "6a1c0d077311f180b356965914e2de5b9e0fdb44",

@@ -133,7 +133,7 @@ def leak_scan(context: Path, needles, report):
 def build(spec_path: Path, out_root: Path):
     spec = tomllib.loads(spec_path.read_text())
     task_id = spec["task"]["id"]
-    repo = Path(spec["source"]["repo_path"]).expanduser().resolve()
+    repo = (spec_path.parent / spec["source"]["repo_path"]).expanduser().resolve()
     fix = spec["source"]["fix_commit"]
 
     parent = git(repo, "rev-parse", f"{fix}^").strip()

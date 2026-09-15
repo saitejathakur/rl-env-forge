@@ -36,7 +36,7 @@ WORKDIR /build
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY context/pyproject.toml context/README.md ./
+COPY context/pyproject.toml context/README.md context/LICENSE.txt ./
 COPY context/src ./src
 
 RUN pip install --no-cache-dir "pytest==8.3.5" \
@@ -55,7 +55,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # `patch` is required by the grader to install the hidden tests at grade time.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends patch \
+ && apt-get install -y --no-install-recommends patch less \
  && rm -rf /var/lib/apt/lists/*
 
 RUN useradd --create-home --uid 1000 agent
@@ -66,7 +66,9 @@ COPY --chown=agent:agent context/ /workspace/
 COPY --chown=agent:agent instruction.md /workspace/INSTRUCTION.md
 
 # The editable install points at the builder path; re-point it at /workspace.
-RUN pip install --no-deps --no-build-isolation -e /workspace \
+RUN SP=$(/opt/venv/bin/python -c "import sysconfig;print(sysconfig.get_paths()['purelib'])") \
+ && printf '/workspace/src\n' > "$SP/_click_editable.pth" \
+ && rm -f "$SP"/__editable__*click* "$SP"/__editable___click*.py 2>/dev/null || true \
  && chown -R agent:agent /workspace /opt/venv
 
 # Fail the image build if a leak ever creeps back in. Cheap, and it turns a
